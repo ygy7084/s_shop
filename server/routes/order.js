@@ -1,76 +1,18 @@
 import express from 'express';
-
+import passport from 'passport';
+import promise from 'es6-promise';
+const Strategy = require('passport-http-bearer').Strategy;
+import socket from '../server';
+promise.polyfill();
 import {
   Order,
 } from '../models';
 
 const router = express.Router();
-/*
-  shop: {
-    id: {type: Schema.Types.ObjectId, ref: 'shop'},
-    name: String,
-  },
-  products:[
-    {
-      name: String,
-      id : {type: Schema.Types.ObjectId, ref: 'product'},
-      price: Number,
-      options: [
-        {
-          name: String,
-          amount: Number,
-        }
-      ]
-    }
-  ],
-  customer:{
-    id : {type: Schema.Types.ObjectId, ref:'customer'},
-    name: String,
-    phone: String,
-  },
-  nfc:{
-    id : {type: Schema.Types.ObjectId, ref:'nfc'},
-    name: String,
-  },
-  place: String,
-  orderedWay: String,
-  datetime : Date,
-  payment: [
-    {
-      name:String,
-      value: Number,
-    }
-  ],
-  message: String,
-  status: Number,
- */
-
 //주문 생성
 router.post('/', (req, res) => {
-  const orderTemp = {
-    shop: req.body.data.shop,
-    products : req.body.data.products,
-    customer : req.body.data.customer,
-    nfc : req.body.data.nfc,
-    place : req.body.data.place,
-    orderedWay : req.body.data.place,
-    datetime : req.body.data.datetime,
-    payment : req.body.data.payment,
-    message : req.body.data.message,
-    status : req.body.data.status,
-  };
-
-  const order = new Order(orderTemp);
-  order.save((err,result) => {
-    if(err){
-      return res.status(500).json({ message : '주문 생성 오류:'});
-    }
-    return res.json({
-      data: result,
-    });
-  });
-
-  return null;
+  socket.emit('create', req.body.data);
+  res.json({ data: true });
 });
 
 //order 리스트 조회
@@ -87,7 +29,8 @@ router.get('/', (req, res) => {
 });
 
 //order 단일 조회
-router.get('/:_id', (req, res) => {
+router.get('/:_id',
+  (req, res) => {
   Order.findOne({ _id: req.params._id })
     .lean()
     .exec((err, result) => {
@@ -98,6 +41,41 @@ router.get('/:_id', (req, res) => {
         data: result,
       });
     });
+});
+
+router.post('/deliver', (req, resp) => {
+  if(!req.body.data._id){
+    return resp.status(500).json({ message : '주문 수정 오류: _id가 전송되지 않았습니다.'});
+  }
+
+  Order.findOneAndUpdate(
+    { _id : req.body.data._id },
+    { delivered: { $set: true } },
+    (err, result) => {
+      if(err) {
+        return resp.status(500).json({ message: "주문 수정 오류 "});
+      }
+      return fetch('http://localhost:4000/api/order/delivered', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: { _id: req.body.data._id },
+        }),
+      })
+        .then((res) => {
+          if (res.ok) { return res.json(); }
+          return res.json().then((error) => {
+            throw error;
+          });
+        })
+        .then((res) => {
+          return resp.json({
+            data: result,
+          });
+        });
+    },
+  );
+  return null;
 });
 
 //주문 수정
