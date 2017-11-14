@@ -42,6 +42,11 @@ router.get('/:_id',
       });
     });
 });
+router.post('/canceled', (req, resp) => {
+  socket.emit('canceled', req.body.data._id);
+  return resp.json({data: true});
+});
+
 
 router.post('/deliver', (req, resp) => {
   if(!req.body.data._id){
