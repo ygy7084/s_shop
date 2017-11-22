@@ -2,7 +2,6 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
-import passport from 'passport';
 import path from 'path';
 import mongoose from 'mongoose';
 import MongoConnect from 'connect-mongo';
@@ -12,6 +11,36 @@ import socket from 'socket.io';
 import configure from './configure';
 import { Account } from './models';
 
+// 서버와 포트 초기화
+const app = express();
+const router = express.Router();
+const port = configure.PORT;
+
+app.use('/', express.static(path.join(__dirname, './../public')));
+
+
+//====Passport 사용 === dh//
+import passport from 'passport';
+import flash from 'connect-flash';
+
+// 세션 설정 dh
+app.use(session({
+  secret: 'my key',
+  resave:true,
+  saveUninitialized:true
+}));
+
+//===passport 사용 설정 dh===//
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(flash());
+
+//=== passport 관련 라우팅 dh===//
+// 로그인 화면 - login.ejs
+router.route('/').get(function(rea,res){
+
+})
+
 // 서버사이드 ajax를 위한 fetch
 import 'isomorphic-fetch';
 
@@ -20,11 +49,6 @@ import api from './routes';
 // 인증
 import auth from './auth';
 
-// 서버와 포트 초기화
-const app = express();
-const port = configure.PORT;
-
-app.use('/', express.static(path.join(__dirname, './../public')));
 
 // 몽고디비 연결 설정
 const db = mongoose.connection;
