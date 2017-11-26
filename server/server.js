@@ -2,7 +2,6 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
-import passport from 'passport';
 import path from 'path';
 import mongoose from 'mongoose';
 import MongoConnect from 'connect-mongo';
@@ -19,11 +18,12 @@ import 'isomorphic-fetch';
 import api from './routes';
 // 인증
 import auth from './auth';
-
 // 서버와 포트 초기화
+
 const app = express();
 const port = configure.PORT;
 
+// 정적 파일 라우트 (CORS 밑에 두면 안된다 - 일반적으로 브라우저로 조회하기 때문)
 app.use('/', express.static(path.join(__dirname, './../public')));
 
 // 몽고디비 연결 설정
@@ -57,11 +57,30 @@ db.once('open', () => {
   });
 });
 
+// 쿠키 사용
+app.use(cookieParser());
+
 // POST 연결을 위한 설정
 app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 app.use(bodyParser.json({ limit: '5mb' }));
 app.enable('trust proxy');
 
+//====Passport 사용 === dh//
+import passport from 'passport';
+import flash from 'connect-flash';
+
+const MongoStore = MongoConnect(session);
+const sessionConfig = {
+  secret: configure.SECRET,
+  resave: false,
+  saveUninitialized: true,
+  store: new MongoStore({ mongooseConnection: mongoose.connection }),
+};
+
+app.use(session(sessionConfig));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(flash());
 app.use(auth);
 
 // API 라우트

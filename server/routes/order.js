@@ -18,6 +18,7 @@ router.post('/', (req, res) => {
 
 //order 리스트 조회
 router.get('/', (req, res) => {
+  console.log('order 조회 들어옴');
   Order.find({})
     .exec((err, result) => {
       if(err){
@@ -28,6 +29,22 @@ router.get('/', (req, res) => {
       });
     });
 });
+
+//shop 연결된 order post조회
+router.post('/post', (req, res) => {
+  console.log('order 조회 post 요청 들어옴');
+  const shop_id = req.body.data.shop_id;
+  Order.find({'shop._id': shop_id})
+  .exec((err, result) => {
+      if(err){
+        return res.status(500).json({message : "주문 리스트 조회 오류 "});
+      }
+      return res.json({
+        data: result,
+      });
+    });
+});
+
 
 //order 단일 조회
 router.get('/:_id',
@@ -93,6 +110,7 @@ router.put('/', (req, res) => {
   const properties = [
     'shop',
     'products',
+    'wholePrice',
     'customer',
     'nfc',
     'place',
