@@ -5,7 +5,6 @@ import session from 'express-session';
 import path from 'path';
 import mongoose from 'mongoose';
 import MongoConnect from 'connect-mongo';
-import cors from 'cors';
 import http from 'http';
 import socket from 'socket.io';
 import configure from './configure';
@@ -57,30 +56,12 @@ db.once('open', () => {
   });
 });
 
-// 쿠키 사용
-app.use(cookieParser());
-
 // POST 연결을 위한 설정
 app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 app.use(bodyParser.json({ limit: '5mb' }));
 app.enable('trust proxy');
 
 //====Passport 사용 === dh//
-import passport from 'passport';
-import flash from 'connect-flash';
-
-const MongoStore = MongoConnect(session);
-const sessionConfig = {
-  secret: configure.SECRET,
-  resave: false,
-  saveUninitialized: true,
-  store: new MongoStore({ mongooseConnection: mongoose.connection }),
-};
-
-app.use(session(sessionConfig));
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(flash());
 app.use(auth);
 
 // API 라우트
