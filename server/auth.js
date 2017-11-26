@@ -2,12 +2,14 @@ import express from 'express';
 import passport from 'passport';
 import passportLocal from 'passport-local';
 import { Account } from './models';
+import { Shop } from './models';
 
 const router = express.Router();
 const LocalStrategy = passportLocal.Strategy;
 
 passport.use('account',new LocalStrategy((username, password, done) => {
   Account.findOne({ username }, (err, account) => {
+    console.log(account.shop._id);
     if (err) { return done(err); }
     if (!account) {
       return done(null, false, { message: 'Incorrect Username.' });
@@ -15,12 +17,17 @@ passport.use('account',new LocalStrategy((username, password, done) => {
     if (account.password !== password) {
       return done(null, false, { message: 'Incorrect Password.' });
     }
+    if(!account.shop._id){
+      console.log('no related shop');
+      return done(null, false, { message: 'No related Shop.'});
+    }
     return done(null, {
       kind: 'account',
       account: {
         _id: account._id,
         username,
         level: account.level,
+        shop_id: account.shop._id,
       }
     });
   });
@@ -35,6 +42,7 @@ passport.deserializeUser((obj, cb) => {
 
 // [START authorize]
 router.post('/auth/login', (req, res, next) => {
+  console.log('/auth/login 요청됨');
   passport.authenticate('account', (err, account, info) => {
     if (err) res.status(500).json(err);
     if (!account) { return res.status(400).json(info.message); }
@@ -47,6 +55,7 @@ router.post('/auth/login', (req, res, next) => {
   })(req, res, next);
 });
 router.get('/auth/logout', (req, res) => {
+  console.log('logout 호출됨');
   req.session.destroy(() => {
     res.clearCookie('connect.sid');
     return res.send({
@@ -56,6 +65,7 @@ router.get('/auth/logout', (req, res) => {
 });
 
 router.get('/auth', (req, res) => {
+  console.log('/auth 요청됨');
   // If user is not stored in session, it will return undefined.
   if (!req.user) {
     return res.status(400).json({ message: '로그인하십시요.', behavior: 'redirectToLogin' });

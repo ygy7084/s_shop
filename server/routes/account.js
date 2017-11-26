@@ -11,7 +11,7 @@ router.post('/', (req, res) => {
   const accountTemp = {
     username: req.body.data.username,
     password: req.body.data.password,
-    connectedShop: req.body.data.connectedShop,
+    shop: req.body.data.shop,
     level: req.body.data.level,
   };
 
@@ -65,7 +65,7 @@ router.put('/', (req, res) => {
   const properties = [
     'username',
     'password',
-    'connectedShop',
+    'shop',
     'level',
   ];
   const update = { $set: {} };

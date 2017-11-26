@@ -11,36 +11,6 @@ import socket from 'socket.io';
 import configure from './configure';
 import { Account } from './models';
 
-// 서버와 포트 초기화
-const app = express();
-const router = express.Router();
-const port = configure.PORT;
-
-app.use('/', express.static(path.join(__dirname, './../public')));
-
-
-//====Passport 사용 === dh//
-import passport from 'passport';
-import flash from 'connect-flash';
-
-// 세션 설정 dh
-app.use(session({
-  secret: 'my key',
-  resave:true,
-  saveUninitialized:true
-}));
-
-//===passport 사용 설정 dh===//
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(flash());
-
-//=== passport 관련 라우팅 dh===//
-// 로그인 화면 - login.ejs
-router.route('/').get(function(rea,res){
-
-})
-
 // 서버사이드 ajax를 위한 fetch
 import 'isomorphic-fetch';
 
@@ -48,7 +18,13 @@ import 'isomorphic-fetch';
 import api from './routes';
 // 인증
 import auth from './auth';
+// 서버와 포트 초기화
 
+const app = express();
+const port = configure.PORT;
+
+// 정적 파일 라우트 (CORS 밑에 두면 안된다 - 일반적으로 브라우저로 조회하기 때문)
+app.use('/', express.static(path.join(__dirname, './../public')));
 
 // 몽고디비 연결 설정
 const db = mongoose.connection;
@@ -81,10 +57,33 @@ db.once('open', () => {
   });
 });
 
+// 쿠키 사용
+app.use(cookieParser());
+
 // POST 연결을 위한 설정
 app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 app.use(bodyParser.json({ limit: '5mb' }));
 app.enable('trust proxy');
+
+
+//====Passport 사용 === dh//
+import passport from 'passport';
+import flash from 'connect-flash';
+
+const MongoStore = MongoConnect(session);
+const sessionConfig = {
+  secret: configure.SECRET,
+  resave: false,
+  saveUninitialized: true,
+  store: new MongoStore({ mongooseConnection: mongoose.connection }),
+};
+
+app.use(session(sessionConfig));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(flash());
+
+app.use(auth);
 
 // API 라우트
 app.use('/api', api);
