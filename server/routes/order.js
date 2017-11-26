@@ -11,6 +11,7 @@ import {
 const router = express.Router();
 //주문 생성
 router.post('/', (req, res) => {
+  console.log(req.body.data);
   socket.emit('create', req.body.data);
   res.json({ data: true });
 });

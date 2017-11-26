@@ -62,6 +62,8 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 app.use(bodyParser.json({ limit: '5mb' }));
 app.enable('trust proxy');
 
+app.use(auth);
+
 // API 라우트
 app.use('/api', api);
 
