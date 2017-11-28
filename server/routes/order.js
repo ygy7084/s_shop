@@ -75,7 +75,7 @@ router.post('/deliver', (req, resp) => {
       if(err) {
         return resp.status(500).json({ message: "주문 수정 오류! "});
       }
-      return fetch('http://localhost:4000/api/order/delivered', {
+      return fetch('http://localhost:80/api/order/delivered', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
