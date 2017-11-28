@@ -67,6 +67,10 @@ app.use(auth);
 // API 라우트
 app.use('/api', api);
 
+app.get('/*', function (req, res) {
+  res.sendFile(path.join(__dirname, './../public', 'index.html'));
+});
+
 // 404 에러
 app.use((req, res) => {
   res.status(404).send('NOT FOUND');

@@ -30,7 +30,7 @@ router.get('/', (req, res) => {
 
 //shop 연결된 order post조회
 router.post('/post', (req, res) => {
-  const shop_id = req.body.data.shop_id;
+  const shop_id = req.body.data.shopId;
   Order.find({'shop._id': shop_id})
   .exec((err, result) => {
       if(err){
