@@ -24,7 +24,6 @@ passport.use(new Strategy(
 // [END setup]
 // [START authorize]
 router.post('/auth/login', (req, res) => {
-  console.log('auth/login 호출');
   Account.findOne({
     username: req.body.data.username,
     password: req.body.data.password,
