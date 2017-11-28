@@ -11,14 +11,12 @@ import {
 const router = express.Router();
 //주문 생성
 router.post('/', (req, res) => {
-  console.log(req.body.data);
   socket.emit('create', req.body.data);
   res.json({ data: true });
 });
 
 //order 리스트 조회
 router.get('/', (req, res) => {
-  console.log('order 조회 들어옴');
   Order.find({})
     .exec((err, result) => {
       if(err){
@@ -32,7 +30,6 @@ router.get('/', (req, res) => {
 
 //shop 연결된 order post조회
 router.post('/post', (req, res) => {
-  console.log('order 조회 post 요청 들어옴');
   const shop_id = req.body.data.shop_id;
   Order.find({'shop._id': shop_id})
   .exec((err, result) => {
