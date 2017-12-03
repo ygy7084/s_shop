@@ -76,7 +76,7 @@ router.post('/cancel', (req, resp) => {
         return resp.status(500).json({ message: "주문 취소 오류! "});
       }
       else {
-        fetch('https://localhost:443/api/order/canceled', {
+        fetch('https://Mamre.kr/api/order/canceled', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -106,7 +106,7 @@ router.post('/deliver', (req, resp) => {
         return resp.status(500).json({ message: "주문 전달 오류! "});
       }
       else {
-        fetch('https://localhost:443/api/order/delivered', {
+        fetch('https://Mamre.kr/api/order/delivered', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
