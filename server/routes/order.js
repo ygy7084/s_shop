@@ -58,41 +58,66 @@ router.get('/:_id',
     });
 });
 
+//주문 취소 들어옴
 router.post('/canceled', (req, resp) => {
   socket.emit('canceled', req.body.data._id);
   return resp.json({data: true});
 });
+// 주문 취소 - 상점에서
+router.post('/cancel', (req, resp) => {
+  if(!req.body.data._id){
+    return resp.status(500).json({ message : '주문 취소 오류: _id가 전송되지 않았습니다.'});
+  }
+  Order.findOneAndUpdate(
+    { _id : req.body.data._id },
+    { $set: {"status":2}  },
+    (err, result) => {
+      if(err) {
+        return resp.status(500).json({ message: "주문 취소 오류! "});
+      }
+      else {
+        fetch('https://localhost:4000/api/order/canceled', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            data: { _id: req.body.data._id },
+          }),
+        });
+        socket.emit('deliverComplete');
+        return resp.json({
+          data: result,
+        });
+      }
+    },
+  );
+  return null;
+});
 
-
+// 상품 전달
 router.post('/deliver', (req, resp) => {
   if(!req.body.data._id){
-    return resp.status(500).json({ message : '주문 수정 오류: _id가 전송되지 않았습니다.'});
+    return resp.status(500).json({ message : '주문 전달 오류: _id가 전송되지 않았습니다.'});
   }
   Order.findOneAndUpdate(
     { _id : req.body.data._id },
     { $set: {"status":1}  },
     (err, result) => {
       if(err) {
-        return resp.status(500).json({ message: "주문 수정 오류! "});
+        return resp.status(500).json({ message: "주문 전달 오류! "});
       }
-      return fetch('https://localhost:4000/api/order/delivered', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          data: { _id: req.body.data._id },
-        }),
-      })
-        .then((res) => {
-          if (res.ok) { return res.json(); }
-          return res.json().then((error) => {
-            throw error;
-          });
-        })
-        .then((res) => {
-          return resp.json({
-            data: result,
-          });
+      else {
+        fetch('https://localhost:4000/api/order/delivered', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            data: { _id: req.body.data._id },
+          }),
         });
+        socket.emit('deliverComplete');
+        return resp.json({
+          data: result,
+        });
+      }
     },
   );
   return null;
