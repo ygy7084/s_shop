@@ -1,9 +1,10 @@
 import express from 'express';
 import passport from 'passport';
 import promise from 'es6-promise';
-const Strategy = require('passport-http-bearer').Strategy;
 import socket from '../server';
-promise.polyfill();
+import configure from '../configure';
+
+const Strategy = require('passport-http-bearer').Strategy;
 import {
   Order,
 } from '../models';
@@ -76,7 +77,7 @@ router.post('/cancel', (req, resp) => {
         return resp.status(500).json({ message: "주문 취소 오류! "});
       }
       else {
-        fetch('https://Mamre.kr/api/order/canceled', {
+        fetch(`${configure.CUSTOMER_URL}/api/order/canceled`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -100,13 +101,17 @@ router.post('/deliver', (req, resp) => {
   }
   Order.findOneAndUpdate(
     { _id : req.body.data._id },
-    { $set: {"status":1}  },
+    { $set: {
+        status: 1,
+        pushStatus: 1,
+      },
+    },
     (err, result) => {
       if(err) {
         return resp.status(500).json({ message: "주문 전달 오류! "});
       }
       else {
-        fetch('https://Mamre.kr/api/order/delivered', {
+        fetch(`${configure.CUSTOMER_URL}/api/order/delivered`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -121,6 +126,16 @@ router.post('/deliver', (req, resp) => {
     },
   );
   return null;
+});
+router.post('/confirmdelivered', (req, res) => {
+  const { _id } = req.body.data;
+  // 다음 console.log 필요 없을 시 삭제
+  console.log(`orderId: ${_id} 메세지 전송 완료`);
+  if (!_id) {
+    return res.status(500).json({ message: '_id 가 없습니다.' });
+  }
+  socket.emit('confirmDelivered', _id);
+  return res.json({ data: true });
 });
 
 //주문 수정
