@@ -118,6 +118,19 @@ router.post('/deliver', (req, resp) => {
             data: { _id: req.body.data._id },
           }),
         });
+        fetch(`${configure.PUSHSERVER_URL}/api/webPush/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            data: {
+              endPoint: result.endPoint,
+              keys: result.keys,
+              message: 'test test test',
+              pushStatus: result.pushStatus,
+            },
+          }),
+        });
+
         socket.emit('deliverComplete');
         return resp.json({
           data: result,

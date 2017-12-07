@@ -1,0 +1,5 @@
+{
+  "MONGO_URL" : "mongodb://localhost:27017/ours",
+  "CUSTOMER_URL" : "https://mamre.kr",
+  "PUSH_SERVER_URL" : "http://localhost:5000"
+}
