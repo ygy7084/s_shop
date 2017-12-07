@@ -118,7 +118,7 @@ router.post('/deliver', (req, resp) => {
             data: { _id: req.body.data._id },
           }),
         });
-        fetch(`${configure.PUSHSERVER_URL}/api/webPush/`, {
+        fetch(`${configure.PUSH_SERVER_URL}/api/webPush/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
