@@ -1,4 +1,5 @@
 {
   "MONGO_URL" : "mongodb://localhost:27017/ours",
-  "CUSTOMER_URL" : "http://localhost:4000"
+  "CUSTOMER_URL" : "http://localhost:4000",
+  "PUSHSERVER_URL" : "http://localhost:5000"
 }

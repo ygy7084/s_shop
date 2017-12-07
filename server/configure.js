@@ -10,6 +10,7 @@ const config_key = [
   'MONGO_URL',
   'PORT',
   'CUSTOMER_URL',
+  'PUSHSERVER_URL',
   'SECRET',
 ];
 
@@ -18,6 +19,7 @@ const configuration = {
   MONGO_URL: '',
   PORT: '',
   CUSTOMER_URL: '',
+  PUSHSERVER_URL: '',
 };
 
 // 위의 객체에 환경설정 입력
