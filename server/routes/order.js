@@ -125,7 +125,7 @@ router.post('/deliver', (req, resp) => {
             data: {
               endPoint: result.endPoint,
               keys: result.keys,
-              message: 'test test test',
+              message: `${result.customer.phone}님, 상품 준비가 완료되었습니다.`,
               pushStatus: result.pushStatus,
             },
           }),
