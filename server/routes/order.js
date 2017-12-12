@@ -6,7 +6,7 @@ import configure from '../configure';
 
 const Strategy = require('passport-http-bearer').Strategy;
 import {
-  Order,
+  Order, Customer,
 } from '../models';
 
 const router = express.Router();
@@ -111,6 +111,16 @@ router.post('/deliver', (req, resp) => {
         return resp.status(500).json({ message: "주문 전달 오류! "});
       }
       else {
+        console.log(result);
+
+        let customer = result.customer.phone;
+        if (result.customer.name && result.customer.name.length) {
+          customer = result.customer.name;
+        }
+        let phone = result.customer.phone;
+        if (phone && phone.length) {
+          phone = `82${phone.slice(1, phone.length)}`;
+        }
         fetch(`${configure.CUSTOMER_URL}/api/order/delivered`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -123,15 +133,18 @@ router.post('/deliver', (req, resp) => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             data: {
-              endPoint: result.endPoint,
-              keys: result.keys,
-              message: `${result.customer.phone}님, 상품 준비가 완료되었습니다.`,
-              pushStatus: result.pushStatus,
-              phone: result.customer.phone,
+              webPush: {
+                endpoint: result.endpoint,
+                keys: result.keys,
+                message: `${customer}님 상품 준비가 완료되었습니다.`,
+              },
+              sms: phone === '' ? {} : {
+                phone,
+                message: `${customer}님 상품 준비가 완료되었습니다. https://mamre.kr/order`,
+              },
             },
           }),
         });
-
         socket.emit('deliverComplete');
         return resp.json({
           data: result,

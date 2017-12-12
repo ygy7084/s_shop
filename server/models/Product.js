@@ -7,7 +7,7 @@ const Product = new Schema({
   price: Number,
   description: String,
   shop : {
-    _id : { type: Schema.Types.ObjectId, ref:'shop' },
+    _id : { type: Schema.Types.ObjectId, ref: 'shop' },
     name : String
   },
   nutrients: [
