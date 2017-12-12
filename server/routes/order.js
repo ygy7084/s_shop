@@ -121,6 +121,14 @@ router.post('/deliver', (req, resp) => {
         if (phone && phone.length) {
           phone = `82${phone.slice(1, phone.length)}`;
         }
+        let webPush;
+        if (result.endpoint && result.keys) {
+          webPush = {
+            endpoint: result.endpoint,
+              keys: result.keys,
+              message: `${customer}님 상품 준비가 완료되었습니다.`,
+          };
+        }
         fetch(`${configure.CUSTOMER_URL}/api/order/delivered`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -133,12 +141,8 @@ router.post('/deliver', (req, resp) => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             data: {
-              webPush: {
-                endpoint: result.endpoint,
-                keys: result.keys,
-                message: `${customer}님 상품 준비가 완료되었습니다.`,
-              },
-              sms: phone === '' ? {} : {
+              webPush,
+              sms: phone === '' ? undefined : {
                 phone,
                 message: `${customer}님 상품 준비가 완료되었습니다. https://mamre.kr/order`,
               },
