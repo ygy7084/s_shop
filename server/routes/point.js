@@ -116,7 +116,7 @@ router.post('/save', (req, res) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   data: {
-                    to: `82${req.body.data.phone}`,
+                    to: `82${req.body.data.phone.slice(1, req.body.data.phone.length)}`,
                     message: `적립 포인트: ${req.body.data.point}, 적립 총 포인트는 ${result[0].point}점입니다. - 마므레`,
                   },
                 }),
