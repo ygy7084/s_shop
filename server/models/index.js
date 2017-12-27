@@ -5,7 +5,7 @@ import Shop from './Shop';
 import Customer from './Customer';
 import Point from './Point';
 
-export{
+export {
   Account,
   Order,
   Product,

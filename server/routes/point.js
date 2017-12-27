@@ -1,6 +1,8 @@
+/* global fetch */
 import express from 'express';
 import { Types } from 'mongoose';
 import socket from '../server';
+import configure from '../configure';
 import { Point, Customer } from '../models';
 
 const router = express.Router();
@@ -108,6 +110,16 @@ router.post('/save', (req, res) => {
                 status: 'success',
                 customer,
                 point: result[0].point,
+              });
+              fetch(`${configure.PUSH_SERVER_URL}/api/push/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  data: {
+                    to: req.body.data.phone,
+                    message: `적립 포인트: ${req.body.data.point}, 적립 총 포인트는 ${result[0].point}점입니다. - 마므레`,
+                  },
+                }),
               });
               return res.json({
                 data: {

@@ -12,7 +12,7 @@ const Account = new mongoose.Schema({
   level : String,
 });
 
-Account.index({username: 1}, {unique: true});
+Account.index({ username: 1 }, { unique: true });
 
 const model = mongoose.model('account', Account);
 

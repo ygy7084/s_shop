@@ -61,13 +61,13 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 app.use(bodyParser.json({ limit: '5mb' }));
 app.enable('trust proxy');
 
-//====Passport 사용 === dh//
+//= ===Passport 사용 === dh//
 app.use(auth);
 
 // API 라우트
 app.use('/api', api);
 
-app.get('/*', function (req, res) {
+app.get('/*', (req, res) => {
   res.sendFile(path.join(__dirname, './../public', 'index.html'));
 });
 
