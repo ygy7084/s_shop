@@ -111,7 +111,7 @@ router.post('/save', (req, res) => {
                 customer,
                 point: result[0].point,
               });
-              fetch(`${configure.PUSH_SERVER_URL}/api/push/`, {
+              fetch(`${configure.PUSH_SERVER_URL}/api/sms/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
