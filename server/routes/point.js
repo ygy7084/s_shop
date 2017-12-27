@@ -144,4 +144,113 @@ router.post('/save', (req, res) => {
         });
     });
 });
+
+// shopId를 받아서 매장별로 보여줄 수 있어야 한다.
+router.get('/:customerPhone', (req, res) => {
+  const { customerPhone } = req.params;
+  Customer.findOne({
+    phone: customerPhone,
+  })
+    .then((customer) => {
+      if (!customer) {
+        return res.status(500).json({ message: '고객 정보가 없습니다.' });
+      }
+      return Point.aggregate([
+        {
+          $match: { 'customer._id': customer._id },
+        },
+        {
+          $group: {
+            _id: customer._id,
+            point: { $sum: '$pointChange' },
+          },
+        },
+      ]);
+    })
+    .then((point) => {
+      if (!point || !point.length) {
+        return res.status(500).json({ message: '포인트 정보가 없습니다.' });
+      }
+      return res.json({
+        data: {
+          customerId: point[0]._id,
+          customerPhone,
+          point: point[0].point,
+        },
+      });
+    })
+    .catch((error) => {
+      res.status(500).json({ message: '에러가 있습니다.', error });
+    });
+});
+router.post('/usePoint', (req, res) => {
+  const {
+    shopId,
+    customerId,
+    point,
+  } = req.body.data;
+  const newPoint = new Point({
+    shop: {
+      _id: shopId,
+    },
+    customer: {
+      _id: customerId,
+    },
+    pointChange: (-1) * Number(point),
+    datetime: new Date(),
+  });
+  new Promise((resolve, reject) => {
+    return newPoint.save((error) => {
+      if (error) {
+        return reject(error);
+      }
+      return resolve();
+    });
+  })
+    .then(() => {
+      return Point.aggregate([
+        {
+          $match: { 'customer._id': Types.ObjectId(customerId) },
+        },
+        {
+          $group: {
+            _id: customerId,
+            point: { $sum: '$pointChange' },
+          },
+        },
+      ]);
+    })
+    .then((point) => {
+      if (!point || !point.length) {
+        return res.status(500).json({ message: '포인트 정보가 없습니다.' });
+      }
+      return Customer.findOne({
+        _id: customerId,
+      })
+        .lean()
+        .then((customer) => {
+          fetch(`${configure.PUSH_SERVER_URL}/api/sms/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              data: {
+                to: `82${customer.phone.slice(1, customer.phone.length)}`,
+                message: `사용 포인트: ${req.body.data.point}, 적립 총 포인트는 ${point[0].point}점입니다. - 마므레`,
+              },
+            }),
+          });
+          return res.json({
+            data: {
+              customerId: point[0]._id,
+              customerPhone: customer.phone,
+              point: point[0].point,
+            },
+          });
+        });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).json({ message: '에러가 있습니다.', error });
+    });
+});
 export default router;
