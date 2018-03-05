@@ -144,7 +144,26 @@ router.post('/save', (req, res) => {
         });
     });
 });
-
+router.get('/', (req, res) => {
+  Point.find({}).sort({ datetime: -1 }).populate('customer._id').lean()
+    .then((list) => {
+      if (!list || !list.length) {
+        return res.status(500).json({ message: '포인트 정보가 없습니다.' });
+      }
+      const changed = list.map((o) => {
+        o.customer = o.customer._id;
+        o.id = o._id;
+        delete o._id;
+        return o;
+      });
+      return res.json({
+        data: changed,
+      });
+    })
+    .catch((error) => {
+      res.status(500).json({ message: '에러가 있습니다.', error });
+    });
+});
 // shopId를 받아서 매장별로 보여줄 수 있어야 한다.
 router.get('/:customerPhone', (req, res) => {
   const { customerPhone } = req.params;
