@@ -164,6 +164,29 @@ router.get('/', (req, res) => {
       res.status(500).json({ message: '에러가 있습니다.', error });
     });
 });
+router.get('/customerDetail/:id', (req, res) => {
+  const { id } = req.params;
+  Customer.findOne({
+    _id: id,
+  })
+    .lean()
+    .then((customer) => {
+      return Point.aggregate([
+        { $match: { 'customer._id': customer._id } },
+        { $group: { _id: '$customer._id', point: { $sum: "$pointChange" } } },
+      ])
+        .then((aggr) => {
+          customer.point = aggr[0].point;
+          return res.json({
+            data: customer,
+          });
+        })
+    })
+    .catch((e) => {
+      console.error(e);
+      return res.status(500).json({ message: e });
+    })
+});
 // shopId를 받아서 매장별로 보여줄 수 있어야 한다.
 router.get('/:customerPhone', (req, res) => {
   const { customerPhone } = req.params;

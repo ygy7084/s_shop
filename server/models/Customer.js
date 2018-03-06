@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 const Customer = new Schema({
   phone: String,
   name : String,
+  memo: String,
   rewards: [
     {
       shop: {
