@@ -7,6 +7,18 @@ import { Point, Customer } from '../models';
 
 const router = express.Router();
 
+router.get('/requestPhoneNumber', (req, res) => {
+  socket.emit('point', {
+    view: 'UsingPoint',
+    pointForSave: 0,
+  });
+  return res.json({ data: true });
+});
+router.post('/submitPhoneNumber', (req, res) => {
+  const { phone } = req.body.data;
+  socket.emit('phone', phone);
+  return res.json({ data: true });
+});
 // 매장으로부터 포인트 적립 화면 요청
 router.post('/request', (req, res) => {
   const { point } = req.body.data;
